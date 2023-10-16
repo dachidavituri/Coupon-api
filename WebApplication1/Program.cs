@@ -1,7 +1,9 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using WebApplication1.Models;
 using WebApplication1.Models.DTO;
+using WebApplication1.Models.Validations;
 using WebApplication1.store;
 using static WebApplication1.store.CouponStore;
 
@@ -70,11 +72,32 @@ app.MapPost("/api/coupon",  (IValidator <CouponDTO> _validation, [FromBody] Coup
 
 
 //update method put
-app.MapPut("/api/coupon/", () =>
+app.MapPut("/api/coupon", async (IValidator<UpdateCoupon> _validation, [FromBody] UpdateCoupon coupon_c_DTO) =>
 {
-    
+    ApiResponse response = new ApiResponse { Success = true, httpStatusCode = System.Net.HttpStatusCode.OK };
 
+    var validationResult = await _validation.ValidateAsync(coupon_c_DTO);
+
+    if (!validationResult.IsValid)
+    {
+        response.Success = false;
+        response.httpStatusCode = System.Net.HttpStatusCode.BadRequest;
+        response.Errors1.Add(validationResult.Errors.FirstOrDefault().ToString());
+        return Results.BadRequest(response);
+    }
+    Coupon CouponStore = CouponStore1.couponList.FirstOrDefault(x => x.Id == coupon_c_DTO.Id);
+    CouponStore.IsActive = coupon_c_DTO.IsActive;
+    CouponStore.Name = coupon_c_DTO.Name;
+    CouponStore.Percent = coupon_c_DTO.Percent;
+    CouponStore.LastUpdated = DateTime.Now;
+
+    response.Success = true;
+    response.httpStatusCode =System.Net.HttpStatusCode.OK;
+    return Results.Ok(response);
+
+    
 });
+
 
 
 // delete method 
@@ -91,7 +114,7 @@ app.MapDelete("/api/delete/{id:int}", (int id) =>
     }
     else
     {
-        response.Errors.Add("invalid");
+        response.Errors1.Add("invalid");
         return Results.BadRequest(response);
     };
 

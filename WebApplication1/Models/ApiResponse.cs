@@ -6,14 +6,14 @@ namespace WebApplication1.Models
     {
 
         public ApiResponse() {
-            Errors = new List<string>();
+            Errors1 = new List<string>();
         }
         public bool Success { get; set; }
         public Object Result { get; set; }
 
         public HttpStatusCode httpStatusCode { get; set; }
 
-        public List <string> Errors { get; set; }
+        public List <string> Errors1 { get; set; }
 
 
     }
